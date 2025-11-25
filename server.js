@@ -8,7 +8,7 @@ app.use(express.static(__dirname));
 app.use(express.urlencoded({ extended: true }));
 
 // ===== Use Atlas connection string here =====
-const uri = 'mongodb+srv://javafinal:sharan%23070401@cluster0.uclz2xt.mongodb.net/students?retryWrites=true&w=majority';
+const uri = 'mongodb+srv://javafinal:sharan070401@cluster0.uclz2xt.mongodb.net/?appName=Cluster0';
 
 mongoose.connect(uri);
 
@@ -38,7 +38,7 @@ app.post('/post', async (req, res) => {
     const user = new Users({ username, password });
     await user.save();
     console.log(user);
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'src', 'main', 'resources', 'static', 'index.html'));
 });
 
 app.listen(port, () => {
