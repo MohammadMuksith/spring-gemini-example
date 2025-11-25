@@ -1,0 +1,26 @@
+{
+  "name": "spring-gemini-example",
+  "version": "1.0.0",
+  "description": "This is a demo project for using Spring Boot, along with Spring AI that uses Google's Gemini Pro model.",
+  "homepage": "https://github.com/MohammadMuksith/spring-gemini-example#readme",
+  "bugs": {
+    "url": "https://github.com/MohammadMuksith/spring-gemini-example/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MohammadMuksith/spring-gemini-example.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "mongodb": "^7.0.0",
+    "mongoose": "^9.0.0",
+    "path": "^0.12.7"
+  }
+}
