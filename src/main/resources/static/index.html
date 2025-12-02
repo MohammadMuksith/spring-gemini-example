@@ -19,6 +19,15 @@
         <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">
             Your Personal Travel Agent ✈️
         </h1>
+        <div class="flex justify-end mb-4">
+        <button
+            id="logoutBtn"
+            class="px-4 py-2 rounded-full text-white font-semibold bg-red-500 hover:bg-red-600 transition duration-200"
+        >
+            Logout
+        </button>
+    </div>
+
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <!-- Input for Destination -->
@@ -82,7 +91,25 @@
             >
                 Get Travel Suggestions
             </button>
+            
         </div>
+        <div class="flex justify-center gap-4 mb-8">
+            <button
+                id="saveTripBtn"
+                class="px-6 py-2 rounded-full text-white font-semibold bg-green-500 hover:bg-green-600 transition duration-300"
+            >
+                Save Trip
+            </button>
+            <button
+                id="myTripsBtn"
+                class="px-6 py-2 rounded-full text-white font-semibold bg-gray-700 hover:bg-gray-800 transition duration-300"
+            >
+                My Saved Trips
+            </button>
+        </div>
+
+        <div id="savedTripsList" class="hidden mt-4 bg-white p-4 rounded-lg border border-gray-200"></div>
+
 
         <!-- Display Area for Suggestions or Error -->
         <div id="errorDisplay" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
@@ -138,8 +165,19 @@
         const sendChatBtn = document.getElementById('sendChatBtn');
         const chatHistoryDisplay = document.getElementById('chatHistoryDisplay');
 
+
         // Global variable to store chat history for context
         let chatHistory = [];
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        const saveTripBtn = document.getElementById('saveTripBtn');
+        const myTripsBtn = document.getElementById('myTripsBtn');
+        const savedTripsList = document.getElementById('savedTripsList');
+
+        logoutBtn.addEventListener('click', async () => {
+        await fetch('/logout', { method: 'POST' });
+        window.location.href = '/login.html';
+        });
 
         /**
          * Toggles the loading state for a button.
@@ -190,39 +228,73 @@
          * @param {Array} parts - The chat history to send to the backend.
          * @param {HTMLButtonElement} button - The button that triggered the call.
          */
+        //async function callApi(parts, button) {
+        //     toggleLoading(button, true);
+        //     displayError(null);
+
+        //     try {
+        //         const response = await fetch('/ai/generate', {
+        //             method: 'POST',
+        //             headers: { 'Content-Type': 'application/json' },
+        //             body: JSON.stringify(parts)
+        //         });
+
+        //         if (!response.ok) {
+        //             const errorText = await response.text();
+        //             throw new Error(`API error: ${response.status} - ${errorText || 'Unknown error'}`);
+        //         }
+
+        //         const text = await response.text();
+
+        //         if (button.id === 'generateBtn') {
+        //             suggestionsContent.innerHTML = text;
+        //             suggestionsDisplay.classList.remove('hidden');
+        //             chatContainer.classList.remove('hidden');
+        //         } else {
+        //             appendMessageToChat('Travel Agent', text, 'text-green-700');
+        //         }
+		// 		chatHistory.push("You answered:" + text);
+        //     } catch (err) {
+        //         console.error("Error:", err);
+        //         displayError(`Failed to get response: ${err.message}. Please try again.`);
+        //     } finally {
+        //         toggleLoading(button, false);
+        //     }
+        // }
         async function callApi(parts, button) {
-            toggleLoading(button, true);
-            displayError(null);
+        toggleLoading(button, true);
+        displayError(null);
 
-            try {
-                const response = await fetch('/ai/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(parts)
-                });
+        try {
+            const response = await fetch('/ai/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }, // CHANGE to this
+                body: JSON.stringify(parts)                      // and this
+            });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`API error: ${response.status} - ${errorText || 'Unknown error'}`);
-                }
-
-                const text = await response.text();
-
-                if (button.id === 'generateBtn') {
-                    suggestionsContent.innerHTML = text;
-                    suggestionsDisplay.classList.remove('hidden');
-                    chatContainer.classList.remove('hidden');
-                } else {
-                    appendMessageToChat('Travel Agent', text, 'text-green-700');
-                }
-				chatHistory.push("You answered:" + text);
-            } catch (err) {
-                console.error("Error:", err);
-                displayError(`Failed to get response: ${err.message}. Please try again.`);
-            } finally {
-                toggleLoading(button, false);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`API error: ${response.status} - ${errorText || 'Unknown error'}`);
             }
+
+            const text = await response.text();
+
+            if (button.id === 'generateBtn') {
+                suggestionsContent.innerHTML = text;
+                suggestionsDisplay.classList.remove('hidden');
+                chatContainer.classList.remove('hidden');
+            } else {
+                appendMessageToChat('Travel Agent', text, 'text-green-700');
+            }
+            chatHistory.push("You answered:" + text);
+        } catch (err) {
+            console.error("Error:", err);
+            displayError(`Failed to get response: ${err.message}. Please try again.`);
+        } finally {
+            toggleLoading(button, false);
         }
+    }
+
 
         // Store original button HTML
         generateBtn.dataset.originalHtml = generateBtn.innerHTML;
@@ -258,6 +330,68 @@
                 sendChatBtn.click();
             }
         });
+        
+        saveTripBtn.addEventListener('click', async () => {
+        const html = suggestionsContent.innerHTML.trim();
+        if (!html) {
+            displayError('No trip to save. Generate a plan first.');
+            return;
+        }
+        try {
+            const res = await fetch('/trips', {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: html
+            });
+            const text = await res.text();
+            if (text === 'OK') {
+                displayError(null);
+                alert('Trip saved!');
+            } else if (text === 'NOT_AUTHENTICATED') {
+                window.location.href = '/login';
+            } else {
+                displayError('Failed to save trip.');
+            }
+        } catch (e) {
+            console.error(e);
+            displayError('Error saving trip.');
+        }
+    });
+
+    myTripsBtn.addEventListener('click', async () => {
+        try {
+            const res = await fetch('/trips');
+            if (!res.ok) throw new Error('Request failed');
+                const trips = await res.json();
+            if (!trips.length) {
+                savedTripsList.innerHTML = '<p class="text-gray-600">No saved trips yet.</p>';
+            } else {
+                savedTripsList.innerHTML = trips.map(t => `
+                    <div class="mb-3 p-3 border rounded cursor-pointer hover:bg-gray-50" data-id="${t.id}">
+                        <div class="font-semibold">${t.title}</div>
+                        <div class="text-xs text-gray-500">${t.createdAt}</div>
+                    </div>
+                `).join('');
+            }
+            savedTripsList.classList.remove('hidden');
+
+            savedTripsList.querySelectorAll('[data-id]').forEach(el => {
+                el.addEventListener('click', () => {
+                    const trip = trips.find(t => t.id === el.dataset.id);
+                    if (trip) {
+                        suggestionsContent.innerHTML = trip.planHtml;
+                        suggestionsDisplay.classList.remove('hidden');
+                        chatContainer.classList.remove('hidden');
+                    }
+                });
+            });
+        } catch (e) {
+            console.error(e);
+            displayError('Error loading saved trips.');
+        }
+    });
+
+
     </script>
 </body>
 </html>

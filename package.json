@@ -21,6 +21,7 @@
     "express": "^5.1.0",
     "mongodb": "^7.0.0",
     "mongoose": "^9.0.0",
+    "node-fetch": "^3.3.2",
     "path": "^0.12.7"
   }
 }
