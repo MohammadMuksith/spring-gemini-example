@@ -1,7 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
-const port = 8080; // You can change this to 8080 for Cloud Shell
+const port = 3000;
+const fetch = require('node-fetch'); // You can change this to 8080 for Cloud Shell
 //const fetch = require('node-fetch');
 
 
@@ -36,33 +37,30 @@ app.get('/', (req, res) => {
 
 });
 
-// app.post('/ai/generate', express.json(), async (req, res) => {
-//   const parts = req.body; // array from frontend
-//   res.send('<p>AI response placeholder</p>');
-// });
-// app.post('/ai/generate', express.json(), async (req, res) => {
-//   try {
-//     const parts = req.body; // array from frontend
 
-//     const response = await fetch('http://localhost:8080/ai/generate', {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(parts)
-//     });
+app.post('/ai/generate', express.json(), async (req, res) => {
+  try {
+    const parts = req.body;
 
+    const response = await fetch('https://8080-cs-283706971453-default.cs-us-east1-dogs.cloudshell.dev/?authuser=0', { // use your Spring port
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(parts)
+    });
 
-//     if (!response.ok) {
-//       const text = await response.text();
-//       return res.status(response.status).send(text);
-//     }
+    if (!response.ok) {
+      const text = await response.text();
+      return res.status(response.status).send(text);
+    }
 
-//     const text = await response.text();
-//     res.send(text);   // send real Gemini HTML back to browser
-//   } catch (err) {
-//     console.error('Proxy /ai/generate error:', err);
-//     res.status(500).send('Backend AI error');
-//   }
-// });
+    const text = await response.text();
+    res.send(text);
+  } catch (err) {
+    console.error('Proxy /ai/generate error:', err);
+    res.status(500).send('Backend AI error');
+  }
+});
+
 
 
 app.post('/logout', (req, res) => {

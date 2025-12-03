@@ -14,41 +14,45 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-//     @Bean
-//     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .authorizeHttpRequests(req -> req
+            .requestMatchers("/login.html", "/auth/login",
+                             "/form.css", "/", "/home",
+                             "/index.html", "/ai/generate", "/trips")
+            .permitAll()
+            .anyRequest().authenticated()
+        )
+        .formLogin(form -> form.disable())
+        .logout(logout -> logout
+            .logoutUrl("/auth/logout")          // Spring Security logout URL
+            .logoutSuccessUrl("/login.html")    // where to go after logout
+            .permitAll()
+        )
+        .csrf(csrf -> csrf.disable());
+
+    return http.build();
+}
+
+//         @Bean
+//         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 //         http
-//                 .authorizeHttpRequests((requests) -> requests
-//                 .requestMatchers("/login", "/login.html", "/form.css", "/error", 
-//                             "/", "/home", "/index.html", "/ai/generate", "/trips").permitAll()
+//                 .authorizeHttpRequests(requests -> requests
+//                 .requestMatchers("/login.html", "/form.css",
+//                              "/", "/auth/login", "/home",
+//                              "/index.html", "/ai/generate", "/trips").permitAll()
 //                 .anyRequest().authenticated()
 //                 )
-//                 .formLogin((form) -> form
-//                         .loginPage("/login.html")
+//                 .formLogin(form -> form
+//                         .loginPage("/login")
 //                         .permitAll()
 //                 )
-//                 .logout((logout) -> logout.permitAll());
-//                 .csrf(csrf -> csrf.disable());
+//                 .logout(logout -> logout.permitAll())
+//                 .csrf(csrf -> csrf.disable());  // correct syntax
 
 //         return http.build();
-//     }
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(requests -> requests
-                .requestMatchers("/login", "/login.html", "/form.css", 
-                                "/", "/home", "/index.html", 
-                                "/ai/generate", "/trips").permitAll()
-                .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .permitAll()
-                )
-                .logout(logout -> logout.permitAll())
-                .csrf(csrf -> csrf.disable());  // correct syntax
-
-        return http.build();
-}
+// }
 
 
     @Bean

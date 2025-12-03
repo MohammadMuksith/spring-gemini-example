@@ -33,36 +33,83 @@ public class AuthController {
     //     return "login";   
     // }
 
-    @PostMapping("/login")
-    public String doLogin(@RequestParam String username,
-                          @RequestParam String password,
-                          HttpSession session,
-                          Model model) {
+    // @PostMapping("/login")
+    // public String doLogin(@RequestParam String username,
+    //                       @RequestParam String password,
+    //                       HttpSession session,
+    //                       Model model) {
+
+    //     User user = userRepository.findByUsername(username);
+
+    //     if (user == null || !user.getPassword().equals(password)) {
+    //         model.addAttribute("error", "Invalid username or password");
+    //         return "login";
+    //     }
+
+    //     session.setAttribute("userId", user.getId());
+    //     return "redirect:/home";
+    // }
+@GetMapping("/auth/login")
+public String loginForm() {
+    return "redirect:/login.html";
+}
+
+@PostMapping("/auth/login")
+public String doLogin(@RequestParam String username,
+                      @RequestParam String password,
+                      HttpSession session,
+                      Model model) {
+
+    try {
+        System.out.println("Login attempt: username=" + username);
 
         User user = userRepository.findByUsername(username);
+        System.out.println("Found user? " + (user != null));
 
-        if (user == null || !user.getPassword().equals(password)) {
+        if (user == null) {
+            user = new User();
+            user.setUsername(username);
+            user.setPassword(password);
+            userRepository.save(user);
+            System.out.println("New user saved with id=" + user.getId());
+        } else if (!user.getPassword().equals(password)) {
+            System.out.println("Password mismatch for user " + username);
             model.addAttribute("error", "Invalid username or password");
-            return "login";
+            return "redirect:/login.html?error=bad_credentials";
         }
 
         session.setAttribute("userId", user.getId());
         return "redirect:/home";
+    } catch (Exception e) {
+        e.printStackTrace();
+        // Redirect with error flag so you can see something happened
+        return "redirect:/login.html?error=server";
     }
+}
+
+
+
+@GetMapping("/home")
+public String home(HttpSession session) {
+    if (session.getAttribute("userId") == null) {
+        return "redirect:/login.html";
+    }
+    return "redirect:/index.html";   // if index.html is in /static
+}
 
     @PostMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/login";
+        return "redirect:/auth/login";
     }
 
-    @GetMapping("/home")
-    public String home(HttpSession session) {
-        if (session.getAttribute("userId") == null) {
-            return "redirect:/login";
-        }
-        return "index"; 
-    }
+    // @GetMapping("/home")
+    // public String home(HttpSession session) {
+    //     if (session.getAttribute("userId") == null) {
+    //         return "redirect:/login";
+    //     }
+    //     return "index"; 
+    // }
 
     
 
